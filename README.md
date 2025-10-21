@@ -15,7 +15,7 @@ This service acts as a gateway that allows systemsworld.club using Discourse Con
 - **Production Ready**: Docker container with health checks and Nomad deployment config
 - **Auto-redirect UI**: User-friendly HTML interface with automatic redirects
 
-## Architecture
+## Architecture.
 
 ```
 ┌──────────┐      ┌─────────────┐      ┌──────────────┐
