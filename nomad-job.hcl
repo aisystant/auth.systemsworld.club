@@ -7,18 +7,16 @@ job "auth-gateway" {
       driver = "docker"
       
       config {
-        # This image line will be automatically updated by CI
         image = "ghcr.io/aisystant/auth.systemsworld.club:latest"
         ports = ["http"]
       }
       
-      # Secrets from Nomad Variables
       template {
         data = <<EOH
-DISCOURSE_CONNECT_SECRET={{ with nomadVar "nomad/jobs/auth-gateway" }}{{ .DISCOURSE_CONNECT_SECRET | toJSON }}{{ end }}
-OIDC_CLIENT_ID={{ with nomadVar "nomad/jobs/auth-gateway" }}{{ .OIDC_CLIENT_ID | toJSON }}{{ end }}
-OIDC_CLIENT_SECRET={{ with nomadVar "nomad/jobs/auth-gateway" }}{{ .OIDC_CLIENT_SECRET | toJSON }}{{ end }}
-OIDC_ISSUER={{ with nomadVar "nomad/jobs/auth-gateway" }}{{ .OIDC_ISSUER | toJSON }}{{ end }}
+DISCOURSE_CONNECT_SECRET={{ with nomadVar "nomad/jobs/auth-gateway/web/app" }}{{ .DISCOURSE_CONNECT_SECRET | toJSON }}{{ end }}
+OIDC_CLIENT_ID={{ with nomadVar "nomad/jobs/auth-gateway/web/app" }}{{ .OIDC_CLIENT_ID | toJSON }}{{ end }}
+OIDC_CLIENT_SECRET={{ with nomadVar "nomad/jobs/auth-gateway/web/app" }}{{ .OIDC_CLIENT_SECRET | toJSON }}{{ end }}
+OIDC_ISSUER={{ with nomadVar "nomad/jobs/auth-gateway/web/app" }}{{ .OIDC_ISSUER | toJSON }}{{ end }}
 EOH
         destination = "${NOMAD_SECRETS_DIR}/app.env"
         env         = true
@@ -43,10 +41,9 @@ EOH
         ]
         
         check {
-          type     = "http"
-          path     = "/"
+          type     = "tcp"
           interval = "10s"
-          timeout  = "3s"
+          timeout  = "2s"
         }
       }
     }
