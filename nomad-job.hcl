@@ -15,10 +15,10 @@ job "auth-gateway" {
       # Secrets from Nomad Variables
       template {
         data = <<EOH
-DISCOURSE_CONNECT_SECRET={{ with nomadVar "nomad/jobs/auth-gateway/web/app" }}{{ .DISCOURSE_CONNECT_SECRET | toJSON }}{{ end }}
-OIDC_CLIENT_ID={{ with nomadVar "nomad/jobs/auth-gateway/web/app" }}{{ .OIDC_CLIENT_ID | toJSON }}{{ end }}
-OIDC_CLIENT_SECRET={{ with nomadVar "nomad/jobs/auth-gateway/web/app" }}{{ .OIDC_CLIENT_SECRET | toJSON }}{{ end }}
-OIDC_ISSUER={{ with nomadVar "nomad/jobs/auth-gateway/web/app" }}{{ .OIDC_ISSUER | toJSON }}{{ end }}
+DISCOURSE_CONNECT_SECRET={{ with nomadVar "nomad/jobs/auth-gateway" }}{{ .DISCOURSE_CONNECT_SECRET | toJSON }}{{ end }}
+OIDC_CLIENT_ID={{ with nomadVar "nomad/jobs/auth-gateway" }}{{ .OIDC_CLIENT_ID | toJSON }}{{ end }}
+OIDC_CLIENT_SECRET={{ with nomadVar "nomad/jobs/auth-gateway" }}{{ .OIDC_CLIENT_SECRET | toJSON }}{{ end }}
+OIDC_ISSUER={{ with nomadVar "nomad/jobs/auth-gateway" }}{{ .OIDC_ISSUER | toJSON }}{{ end }}
 EOH
         destination = "${NOMAD_SECRETS_DIR}/app.env"
         env         = true
