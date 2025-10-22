@@ -50,7 +50,8 @@ EOH
     
     network {
       port "http" {
-        to = 8000
+        static = 8020
+        to = 8020
       }
     }
   }
