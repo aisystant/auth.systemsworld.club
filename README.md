@@ -1,4 +1,4 @@
-# Discourse Connect <-> OIDC Gateway
+# Discourse Connect <-> OIDC Gateway.
 
 A secure authentication bridge between Discourse Connect and OIDC providers, implemented in Python with FastAPI.
 
