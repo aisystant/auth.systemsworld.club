@@ -43,6 +43,7 @@ async def handle_auth(request: Request):
     client_id = os.getenv('OIDC_CLIENT_ID')
     client_secret = os.getenv('OIDC_CLIENT_SECRET')
     issuer = os.getenv('OIDC_ISSUER')
+    GATEWAY_URL = os.getenv('GATEWAY_URL', 'https://auth.systemsworld.club/')
 
     if not all([discourse_secret, client_id, client_secret, issuer]):
         return Response(content='Missing environment configuration', status_code=500)
@@ -80,7 +81,7 @@ async def handle_auth(request: Request):
                     'code': code,
                     'client_id': client_id,
                     'client_secret': client_secret,
-                    'redirect_uri': f"{request.url.scheme}://{request.url.netloc}{request.url.path}",
+                    'redirect_uri': f"{GATEWAY_URL}{request.url.path}",
                 }
             )
 
@@ -175,7 +176,7 @@ async def handle_auth(request: Request):
 
     # Build state parameter containing original SSO data
     state = encode_string_to_base64(json.dumps({'sso': sso, 'sig': sig}))
-    redirect_uri = f"{request.url.scheme}://{request.url.netloc}{request.url.path}"
+    redirect_uri = f"{GATEWAY_URL}{request.url.path}"
     authorization_endpoint = issuer.rstrip('/') + '/oauth2/auth'
 
     # Build authorization URL
