@@ -81,7 +81,8 @@ async def handle_auth(request: Request):
                     'code': code,
                     'client_id': client_id,
                     'client_secret': client_secret,
-                    'redirect_uri': f"{GATEWAY_URL}{request.url.path}",
+#                    'redirect_uri': f"{GATEWAY_URL}{request.url.path}",
+                    'redirect_uri': f"{GATEWAY_URL.rstrip('/')}{request.url.path}",
                 }
             )
 
@@ -176,7 +177,8 @@ async def handle_auth(request: Request):
 
     # Build state parameter containing original SSO data
     state = encode_string_to_base64(json.dumps({'sso': sso, 'sig': sig}))
-    redirect_uri = f"{GATEWAY_URL}{request.url.path}"
+#    redirect_uri = f"{GATEWAY_URL}{request.url.path}"
+    redirect_uri = f"{GATEWAY_URL.rstrip('/')}{request.url.path}"
     authorization_endpoint = issuer.rstrip('/') + '/oauth2/auth'
 
     # Build authorization URL
