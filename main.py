@@ -153,7 +153,8 @@ async def handle_auth(request: Request):
         else:
             # Fallback to synthetic email when Hydra does not provide a valid email
             email = f"{sub}@users.systemsworld.club"
-            require_activation = 'true'
+            # Activation email недоступен в проде (почта отключена), поэтому не требуем активацию
+            require_activation = 'false'
 
         preferred_username = jwt_payload.get('preferred_username')
         username_guess = preferred_username or (email.split('@')[0] if email else sub)
