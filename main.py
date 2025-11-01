@@ -3,6 +3,7 @@ import json
 import hmac
 import hashlib
 import base64
+import re
 from urllib.parse import urlencode, parse_qs, urlparse, urljoin
 from typing import Optional, Dict, Any
 
@@ -32,6 +33,24 @@ def decode_base64_to_string(base64_string: str) -> str:
 def encode_string_to_base64(text: str) -> str:
     """Encode UTF-8 text to base64 string."""
     return base64.b64encode(text.encode('utf-8')).decode('utf-8')
+
+
+def is_valid_email(email: Optional[str]) -> bool:
+    """Very small email validity check sufficient for Discourse expectations."""
+    if not email or '@' not in email:
+        return False
+    # basic RFC-like check without being overly strict
+    return re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email) is not None
+
+
+def sanitize_username(raw_username: Optional[str]) -> str:
+    """Normalize username to Discourse-compatible: [a-z0-9_], 3..25 chars."""
+    base = (raw_username or '').lower()
+    base = re.sub(r"[^a-z0-9_]", "_", base)
+    base = re.sub(r"_+", "_", base).strip('_')
+    if len(base) < 3:
+        base = (base + "_user")[:3]
+    return base[:25] or 'user'
 
 
 @app.get("/")
@@ -123,12 +142,29 @@ async def handle_auth(request: Request):
         if jwt_payload.get('nonce') != nonce:
             return Response(content='Nonce mismatch (possible replay attack)', status_code=403)
 
-        # Extract user information from JWT
+        # Extract user information from JWT with safe fallbacks
+        sub = jwt_payload.get('sub')
+        email_claim = jwt_payload.get('email')
+        email_verified_claim = jwt_payload.get('email_verified')
+
+        if is_valid_email(email_claim):
+            email = email_claim
+            require_activation = 'false' if (email_verified_claim is True) else 'true'
+        else:
+            # Fallback to synthetic email when Hydra does not provide a valid email
+            email = f"{sub}@users.systemsworld.club"
+            require_activation = 'true'
+
+        preferred_username = jwt_payload.get('preferred_username')
+        username_guess = preferred_username or (email.split('@')[0] if email else sub)
+        username = sanitize_username(username_guess)
+        name = jwt_payload.get('name') or username
+
         user = {
-            'external_id': jwt_payload.get('sub'),
-            'email': jwt_payload.get('email'),
-            'username': jwt_payload.get('preferred_username') or jwt_payload.get('email', '').split('@')[0],
-            'name': jwt_payload.get('name') or jwt_payload.get('email'),
+            'external_id': sub,
+            'email': email,
+            'username': username,
+            'name': name,
         }
 
         # Build outgoing payload for Discourse
@@ -138,7 +174,7 @@ async def handle_auth(request: Request):
             'external_id': user['external_id'],
             'username': user['username'],
             'name': user['name'],
-            'require_activation': 'false',
+            'require_activation': require_activation,
         })
 
         base64_payload = encode_string_to_base64(outgoing_payload)
