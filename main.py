@@ -89,7 +89,12 @@ async def handle_auth(request: Request):
             return Response(content='Invalid signature', status_code=403)
 
         # Exchange code for token
-        token_endpoint = issuer.rstrip('/') + '/oauth2/token'
+        internal_url = os.getenv('OIDC_INTERNAL_URL')
+        if internal_url:
+            token_endpoint = internal_url.rstrip('/') + '/oauth2/token'
+        else:
+            token_endpoint = issuer.rstrip('/') + '/oauth2/token'
+
 
         async with httpx.AsyncClient() as client:
             token_response = await client.post(
@@ -115,7 +120,11 @@ async def handle_auth(request: Request):
             return Response(content='Missing id_token in token response', status_code=502)
 
         # Secure JWT validation with PyJWT
-        jwks_url = f"{issuer}/.well-known/jwks.json"
+        internal_url = os.getenv('OIDC_INTERNAL_URL')
+        if internal_url:
+            jwks_url = f"{internal_url}/.well-known/jwks.json"
+        else:
+            jwks_url = f"{issuer}/.well-known/jwks.json"
         jwks_client = PyJWKClient(jwks_url)
 
         try:
