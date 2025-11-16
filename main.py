@@ -187,6 +187,9 @@ async def handle_auth(request: Request):
             'require_activation': require_activation,
         })
 
+        # log payload
+        print("Outgoing payload for Discourse:", outgoing_payload)
+
         base64_payload = encode_string_to_base64(outgoing_payload)
         response_sig = hmac_sha256_hex(discourse_secret, base64_payload)
 
