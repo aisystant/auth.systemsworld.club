@@ -223,7 +223,8 @@ async def handle_auth(request: Request):
 
         if is_valid_email(email_claim):
             email = email_claim
-            require_activation = 'false' if (email_verified_claim is True) else 'true'
+            # require_activation = 'false' if (email_verified_claim is True) else 'true'
+            require_activation = 'true' if (email_verified_claim is False) else 'false'
             print(f"Using email from JWT: {email}")
         else:
             # Fallback to synthetic email when Hydra does not provide a valid email
